@@ -1,141 +1,271 @@
 const db = require('./db/branding')
 
-const editMainBranding = async (id, user_id) => {
-  await db.updateAllBrandingMainStatus(user_id)
-  const branding = db.updateBrandingMainStatus(id, user_id)
-  return branding
-}
-
-const editBranding = async (params) => {
-  const branding = await db.updateBranding({ ...params })
-  return branding
-}
-
-const deleteBranding = async (id) => {
-  const branding = await db.destroyBranding(id)
-  return branding
-}
-
-const getBrandingList = async () => {
-  let results = []
-  const brandingList = await db.selectAllBranding()
-  for await (const item of brandingList) {
-    results.push(await getBrandingInfo(item.userId))
+// Create Branding Resource [create]
+exports.createBranding = async (body) => {
+  const attr = {
+    userId: body.user_id,
+    title: body.title,
+    description: body.description,
+    keyword_array: body.keyword_array,
+    shop_name: body.shop_name,
+    position: body.position,
+    address: body.address,
+    operation_time: body.operation_time,
+    break_time: body.break_time,
+    shop_number: body.shop_number,
+    extra_info: body.extra_info,
   }
-
-  return results
+  const branding = await db.createBranding(attr)
+  if (branding) {
+    return branding.dataValues
+  } else {
+    return null
+  }
 }
-
-const getBrandingListByUserId = async (userId) => {
-  const results = []
-  const brandingList = await db.selectBrandingWithStyle(userId)
-  for await (const branding of brandingList) {
-    const {
-      id,
-      user_id,
-      title,
-      address,
-      authentication,
-      description,
-      shop_name,
-      position,
-      keywords,
-      main,
-      created_at,
-    } = branding
-    const result = {
-      id,
-      user_id,
-      description,
-      shop_name,
-      position,
-      title,
-      address,
-      authentication,
-      keywords: keywords == '' ? [] : keywords.replace(' ', '').split(','),
-      main,
-      created_at,
-      styles: branding.styleMenus.map((style) => style.dataValues),
-      user: branding.user.dataValues,
+exports.createBrandingStyle = async ({ brandingId, styleIdList }) => {
+  if (styleIdList) {
+    const brandingStyleList = await Promise.all(
+      styleIdList.map((styleId) => {
+        const attr = {
+          brandingId,
+          styleId,
+        }
+        return db.createBrandingStyle(attr)
+      })
+    )
+    if (brandingStyleList) {
+      return brandingStyleList
+    } else {
+      return null
     }
-    results.push(result)
+  } else {
+    return null
   }
-  return results
 }
 
-const registerBranding = async (params) => {
-  const branding = await db.insertBranding({ ...params })
-  return branding
-}
-
-const registerBrandingStyle = async ({ brandingId, styles }) => {
-  const results = await Promise.all(
-    styles.map((style) => {
-      return db.insertBrandingStyle(brandingId, style)
+// Read Branding Resource [findOne, findAll]
+exports.findAllBranding = async () => {
+  let brandingList = await db.findAllBranding()
+  if (brandingList && brandingList.length > 0) {
+    brandingList = brandingList.map((branding) => {
+      let keyword_array = []
+      let address = {}
+      let extra_info = []
+      if (branding.keyword_array) {
+        keyword_array = branding.keyword_array.split(',')
+      }
+      if (branding.extra_info) {
+        extra_info = branding.extra_info.split(',')
+      }
+      if (branding.address) {
+        const [zoneCode, streetAddress, detailAddress] =
+          branding.address.split(',')
+        address = {
+          zoneCode,
+          address: streetAddress,
+          detailAddress,
+        }
+      }
+      return {
+        ...branding.dataValues,
+        keyword_array,
+        address,
+        extra_info,
+        brandingStyles: branding.brandingStyles.map((style) => {
+          let style_keyword_array = []
+          if (style.keyword_array) {
+            style_keyword_array = style.keyword_array.split(',')
+          }
+          return {
+            ...style.dataValues,
+            keyword_array: style_keyword_array,
+          }
+        }),
+      }
     })
-  )
-  return results
-}
-
-const getBrandingInfo = async (userId) => {
-  let result = {}
-  let styles = []
-
-  const brandingInfo = await db.selectBrandingInfo(userId)
-  const brandingStyles = await db.selectBrandingWithStyle(userId)
-
-  for (const brandingStyle of brandingStyles) {
-    styles = makeStyleData(brandingStyle.dataValues.styleMenus)
+    return brandingList
+  } else {
+    return null
   }
-
-  result.id = brandingInfo.id
-  result.userId = brandingInfo.user_id
-  result.name = brandingInfo['user.name']
-  result.img_src = brandingInfo['user.img_src']
-  result.distance = 1
-  result.description = brandingInfo.description
-  result.shopName = brandingInfo.shop_name
-  result.keywords =
-    brandingInfo.keywords == '' ? [] : brandingInfo.keywords.split(',')
-  result.styles = styles
-
-  return result
 }
-
-const makeStyleData = (styles) => {
-  let results = []
-  for (const item of styles) {
-    const {
-      id,
-      title,
-      subtitle,
-      price,
-      gender,
-      img_src,
-      created_at,
-      updated_at,
-    } = item.dataValues
-    results.push({
-      id,
-      title,
-      subtitle,
-      price,
-      gender,
-      img_src,
-      created_at,
-      updated_at,
+exports.findOneBranding = async (id) => {
+  let branding = await db.findOneBranding(id)
+  if (branding) {
+    let keyword_array = []
+    let address = {}
+    let extra_info = []
+    if (branding.keyword_array) {
+      keyword_array = branding.keyword_array.split(',')
+    }
+    if (branding.extra_info) {
+      extra_info = branding.extra_info.split(',')
+    }
+    if (branding.address) {
+      const [zoneCode, streetAddress, detailAddress] =
+        branding.address.split(',')
+      address = {
+        zoneCode,
+        address: streetAddress,
+        detailAddress,
+      }
+    }
+    branding = {
+      ...branding.dataValues,
+      keyword_array,
+      address,
+      extra_info,
+      brandingStyles: branding.brandingStyles.map((style) => {
+        let style_keyword_array = []
+        if (style.keyword_array) {
+          style_keyword_array = style.keyword_array.split(',')
+        }
+        return {
+          ...style.dataValues,
+          keyword_array: style_keyword_array,
+        }
+      }),
+    }
+    return branding
+  } else {
+    return null
+  }
+}
+exports.findAllBrandingByDesignerId = async (id) => {
+  let brandingList = await db.findAllBrandingByDesignerId(id)
+  if (brandingList && brandingList.length > 0) {
+    brandingList = brandingList.map((branding) => {
+      let keyword_array = []
+      let address = {}
+      let extra_info = []
+      if (branding.keyword_array) {
+        keyword_array = branding.keyword_array.split(',')
+      }
+      if (branding.extra_info) {
+        extra_info = branding.extra_info.split(',')
+      }
+      if (branding.address) {
+        const [zoneCode, streetAddress, detailAddress] =
+          branding.address.split(',')
+        address = {
+          zoneCode,
+          address: streetAddress,
+          detailAddress,
+        }
+      }
+      return {
+        ...branding.dataValues,
+        keyword_array,
+        address,
+        extra_info,
+        brandingStyles: branding.brandingStyles.map((style) => {
+          let style_keyword_array = []
+          if (style.keyword_array) {
+            style_keyword_array = style.keyword_array.split(',')
+          }
+          return {
+            ...style.dataValues,
+            keyword_array: style_keyword_array,
+          }
+        }),
+      }
     })
+    return brandingList
+  } else {
+    return null
   }
-  return results
+}
+exports.findOneBrandingByDesignerId = async (userId) => {
+  let branding = await db.findOneBrandingByUserId(userId)
+  if (branding) {
+    let keyword_array = []
+    let address = {}
+    let extra_info = []
+    if (branding.keyword_array) {
+      keyword_array = branding.keyword_array.split(',')
+    }
+    if (branding.extra_info) {
+      extra_info = branding.extra_info.split(',')
+    }
+    if (branding.address) {
+      const [zoneCode, streetAddress, detailAddress] =
+        branding.address.split(',')
+      address = {
+        zoneCode,
+        address: streetAddress,
+        detailAddress,
+      }
+    }
+    branding = {
+      ...branding.dataValues,
+      keyword_array,
+      address,
+      extra_info,
+      brandingStyles: branding.brandingStyles.map((style) => {
+        let style_keyword_array = []
+        if (style.keyword_array) {
+          style_keyword_array = style.keyword_array.split(',')
+        }
+        return {
+          ...style.dataValues,
+          keyword_array: style_keyword_array,
+        }
+      }),
+    }
+    return branding
+  } else {
+    return null
+  }
 }
 
-module.exports = {
-  getBrandingListByUserId,
-  getBrandingInfo,
-  getBrandingList,
-  registerBranding,
-  registerBrandingStyle,
-  editBranding,
-  editMainBranding,
-  deleteBranding,
+// Update Branding Resource [update]
+exports.updateBranding = async (id, body) => {
+  const branding = await db.updateBranding(id, body)
+  if (branding) {
+    return branding
+  } else {
+    return null
+  }
+}
+
+exports.updateBrandingStyle = async ({ brandingId, styleIdList }) => {
+  if (styleIdList) {
+    await db.destroyBrandingStyle(brandingId)
+    const brandingStyleList = await Promise.all(
+      styleIdList.map((styleId) => {
+        const attr = {
+          brandingId,
+          styleId,
+        }
+        return db.createBrandingStyle(attr)
+      })
+    )
+    if (brandingStyleList) {
+      return brandingStyleList
+    } else {
+      return null
+    }
+  } else {
+    return null
+  }
+}
+
+exports.updateMainBranding = async (body) => {
+  const { user_id, branding_id } = body
+  await db.updateAllOtherBranding(user_id)
+  const branding = await db.updateMainBranding(branding_id)
+  if (branding) {
+    return branding
+  } else {
+    return null
+  }
+}
+
+// Delete Branding Resoure [destroy]
+exports.destroyBranding = async (id) => {
+  const branding = await db.destroyBranding(id)
+  if (branding) {
+    return branding
+  } else {
+    return null
+  }
 }

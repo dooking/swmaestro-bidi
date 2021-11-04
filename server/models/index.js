@@ -48,12 +48,14 @@ db.User = require('./user')(sequelize, Sequelize)
 db.Proposal = require('./proposal')(sequelize, Sequelize)
 db.Branding = require('./branding')(sequelize, Sequelize)
 db.Style = require('./style')(sequelize, Sequelize)
+db.ScheduleInfo = require('./scheduleInfo')(sequelize, Sequelize)
+db.Schedule = require('./schedule')(sequelize, Sequelize)
 db.Bid = require('./bid')(sequelize, Sequelize)
+db.Matching = require('./matching')(sequelize, Sequelize)
 db.Room = require('./room')(sequelize, Sequelize)
 db.Message = require('./message')(sequelize, Sequelize)
-db.MatchingHistory = require('./matchingHistory')(sequelize, Sequelize)
 
-db.StyleMenu = require('./relation/styleMenu')(sequelize, Sequelize)
+db.BrandingStyle = require('./relation/brandingStyle')(sequelize, Sequelize)
 db.StyleScrap = require('./relation/styleScrap')(sequelize, Sequelize)
 db.BidStyle = require('./relation/bidStyle')(sequelize, Sequelize)
 
@@ -67,25 +69,13 @@ db.Branding.belongsTo(db.User, {
   onDelete: 'CASCADE',
 })
 
-// 관계정의 User : Bid = 1 : N
-db.User.hasMany(db.Bid, {
-  foreignKey: { name: 'customer_id', allowNull: false, as: 'customer' },
-  targetKey: { name: 'id', allowNull: false, as: 'customer' },
+// 관계정의 User : Style = 1 : N
+db.User.hasMany(db.Style, {
+  foreignKey: { allowNull: false },
   onDelete: 'CASCADE',
 })
-db.Bid.belongsTo(db.User, {
-  foreignKey: { name: 'customer_id', allowNull: false, as: 'customer' },
-  sourceKey: { name: 'id', allowNull: false, as: 'customer' },
-  onDelete: 'CASCADE',
-})
-db.User.hasMany(db.Bid, {
-  foreignKey: { name: 'designer_id', allowNull: false, as: 'designer' },
-  targetKey: { name: 'id', allowNull: false, as: 'designer' },
-  onDelete: 'CASCADE',
-})
-db.Bid.belongsTo(db.User, {
-  foreignKey: { name: 'designer_id', allowNull: false, as: 'designer' },
-  sourceKey: { name: 'id', allowNull: false, as: 'designer' },
+db.Style.belongsTo(db.User, {
+  foreignKey: { allowNull: false },
   onDelete: 'CASCADE',
 })
 
@@ -96,6 +86,38 @@ db.User.hasMany(db.Proposal, {
 })
 db.Proposal.belongsTo(db.User, {
   foreignKey: { allowNull: false },
+  onDelete: 'CASCADE',
+})
+
+// 관계정의 User : ScheduleInfo = 1 : 1
+db.ScheduleInfo.belongsTo(db.User, {
+  foreignKey: { name: 'designer_id', allowNull: false, as: 'designer' },
+  sourceKey: { name: 'id', allowNull: false, as: 'designer' },
+  onDelete: 'CASCADE',
+})
+db.User.hasOne(db.ScheduleInfo, {
+  foreignKey: { name: 'designer_id', allowNull: false, as: 'designer' },
+})
+
+// 관계정의 User : Schedule = 1 : N
+db.Schedule.belongsTo(db.User, {
+  foreignKey: { name: 'designer_id', allowNull: false, as: 'designer' },
+  sourceKey: { name: 'id', allowNull: false, as: 'designer' },
+  onDelete: 'CASCADE',
+})
+db.User.hasMany(db.Schedule, {
+  foreignKey: { name: 'designer_id', allowNull: false, as: 'designer' },
+})
+
+// 관계정의 User : Bid = 1 : N
+db.User.hasMany(db.Bid, {
+  foreignKey: { name: 'designer_id', allowNull: false, as: 'designer' },
+  targetKey: { name: 'id', allowNull: false, as: 'designer' },
+  onDelete: 'CASCADE',
+})
+db.Bid.belongsTo(db.User, {
+  foreignKey: { name: 'designer_id', allowNull: false, as: 'designer' },
+  sourceKey: { name: 'id', allowNull: false, as: 'designer' },
   onDelete: 'CASCADE',
 })
 
@@ -125,13 +147,13 @@ db.User.belongsToMany(db.Style, {
 
 // 관계정의 Branding : Style = M : N
 db.Style.belongsToMany(db.Branding, {
-  through: 'styleMenu',
-  as: 'styleMenus',
+  through: 'brandingStyle',
+  as: 'brandingStyles',
   onDelete: 'CASCADE',
 })
 db.Branding.belongsToMany(db.Style, {
-  through: 'styleMenu',
-  as: 'styleMenus',
+  through: 'brandingStyle',
+  as: 'brandingStyles',
   onDelete: 'CASCADE',
 })
 
@@ -144,6 +166,16 @@ db.Style.belongsToMany(db.Bid, {
 db.Bid.belongsToMany(db.Style, {
   through: 'bidStyle',
   as: 'bidStyles',
+  onDelete: 'CASCADE',
+})
+
+// 관계정의 Style : Matching  = 1 : N
+db.Style.hasMany(db.Matching, {
+  foreignKey: { allowNull: true },
+  onDelete: 'CASCADE',
+})
+db.Matching.belongsTo(db.Style, {
+  foreignKey: { allowNull: true },
   onDelete: 'CASCADE',
 })
 
@@ -173,8 +205,11 @@ db.Message.belongsTo(db.Room, {
   onDelete: 'CASCADE',
 })
 
-// 관계정의 MatchingHistory : Bid = 1 : 1
-db.MatchingHistory.belongsTo(db.Bid)
-db.MatchingHistory.belongsTo(db.Proposal)
+// 관계정의 Matching : Bid = 1 : 1
+db.Matching.belongsTo(db.Bid)
+db.Matching.belongsTo(db.Proposal)
+
+// 관계정의 Schedule : Matching = 1 : 1
+db.Schedule.belongsTo(db.Matching)
 
 module.exports = db

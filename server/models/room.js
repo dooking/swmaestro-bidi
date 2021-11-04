@@ -8,7 +8,7 @@ const modelAttributes = {
     primaryKey: true,
     autoIncrement: true,
   },
-  bid_id: {
+  matching_id: {
     type: DataTypes.INTEGER,
   },
   unread_customer: {
@@ -20,6 +20,14 @@ const modelAttributes = {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: true,
+  },
+
+  // Status Attributes
+  done: {
+    type: DataTypes.BOOLEAN,
+  },
+  canceled: {
+    type: DataTypes.BOOLEAN,
   },
   created_at: {
     type: DataTypes.DATE,

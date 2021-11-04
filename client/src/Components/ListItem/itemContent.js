@@ -1,24 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
+
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import Modal from 'react-native-modal';
+import BrandingAPI from '../../Api/branding';
+import { deleteBranding } from '../../Contexts/Designer/Branding';
 
 function ItemContent({ info, screen, navigation, modalVisible, setModalVisible }) {
-  const keywords = info.proposal ? info.proposal.keywords : info.keywords;
-  const img_src = info.proposal ? info.proposal.after_src : info.user.img_src;
-  const distance_limit = info.proposal ? info.proposal.distance_limit + 'km 이내' : info.position;
-  const address = info.address
-    ? info.address
-    : info.user
-    ? info.user.address
-    : info.customer.address;
-  const title = info.proposal ? (info.user ? info.user.name : info.customer.name) : info.title;
-  const description = info.proposal
-    ? info.proposal.description
-    : info.letter
-    ? info.letter
-    : info.description;
+  const dispatch = useDispatch();
+
+  let data;
+  switch (screen) {
+    case 'bid':
+      data = {
+        img_src: info.proposal.before_src,
+        name: info.proposal.user.name,
+        address: info.proposal.address,
+        description: info.proposal.description,
+        keyword_array: info.proposal.keyword_array,
+      };
+      break;
+    case 'matching':
+      data = {
+        img_src: info.proposal.before_src,
+        name: info.proposal.user.name,
+        address: info.proposal.address,
+        description: info.proposal.description,
+        keyword_array: info.proposal.keyword_array,
+      };
+      break;
+    case 'branding':
+      data = {
+        img_src: info.user.img_src,
+        name: info.user.name,
+        address: info.shop_name,
+        description: info.description,
+        keyword_array: info.keyword_array,
+      };
+      break;
+    case 'history':
+      data = {
+        img_src: info.proposal.user.img_src,
+        name: info.proposal.user.name,
+        address: info.proposal.address,
+        description: info.proposal.description,
+        keyword_array: info.proposal.keyword_array,
+      };
+      break;
+    default:
+      break;
+  }
 
   const deleteAlert = (id) => {
     Alert.alert('정말 삭제하시겠습니까?', '삭제후에는 변경이 불가능합니다', [
@@ -33,54 +66,34 @@ function ItemContent({ info, screen, navigation, modalVisible, setModalVisible }
   };
 
   const deleteSubmitHandler = async (id) => {
-    await fetch('http://127.0.0.1:3000' + `/api/branding/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json;charset=UTF-8',
-      },
-      body: JSON.stringify({
-        main: 1,
-      }),
-    })
-      .then((response) => response.json())
-      .then(async (response) => {
-        if (response) {
-          Alert.alert('삭제되었습니다!');
-          setModalVisible(false);
-          navigation.push('BrandingMain');
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    const response = await BrandingAPI.deleteBranding(id);
+    if (response) {
+      dispatch(deleteBranding);
+      Alert.alert('삭제되었습니다!');
+      setModalVisible(false);
+      navigation.push('BrandingMain');
+    }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.profileBox}>
-        <Image source={{ uri: img_src }} style={styles.profileImg} />
+        <Image source={{ uri: data.img_src }} style={styles.profileImg} />
       </View>
       <View style={styles.bidInfoArea}>
         <View style={styles.nameArea}>
-          <Text style={styles.nameText}>{title}</Text>
+          <Text style={styles.nameText}>{data.name}</Text>
         </View>
         <View style={styles.locationArea}>
           <View style={styles.locationView}>
             <Ionicons name="at" size={15} />
-            <Text style={styles.locationText}>{address}</Text>
-          </View>
-          <View style={styles.locationView}>
-            <Ionicons
-              name={screen === 'branding' ? 'md-cut-outline' : 'location-outline'}
-              size={15}
-            />
-            <Text style={styles.locationText}>{distance_limit}</Text>
+            <Text style={styles.locationText}>{data.address}</Text>
           </View>
         </View>
         <View style={styles.tagArea}>
-          {keywords &&
-            keywords.length > 0 &&
-            keywords.map((keyword, index) => (
+          {data.keyword_array &&
+            data.keyword_array.length > 0 &&
+            data.keyword_array.map((keyword, index) => (
               <View style={styles.tagView} key={index}>
                 <Text style={styles.tagText}># {keyword}</Text>
               </View>
@@ -88,7 +101,7 @@ function ItemContent({ info, screen, navigation, modalVisible, setModalVisible }
         </View>
         <View style={styles.descriptionArea}>
           <Text style={styles.descriptionText} numberOfLines={2}>
-            {description}
+            {data.description}
           </Text>
         </View>
       </View>

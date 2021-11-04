@@ -1,194 +1,155 @@
 const proposalServices = require('../../services/proposal')
-const { STATUS_CODE, ERROR_MESSAGE } = require('../../lib/constants')
+const { STATUS_CODE } = require('../../lib/constants')
 
-/*
-    GET /api/proposal/:id
-    * 제안서 정보 조회 API
-*/
-exports.getProposal = async (req, res, next) => {
-  try {
-    const { proposalId } = req.params
-    const proposal = await proposalServices.getProposal(proposalId)
-
-    res.status(STATUS_CODE.SUCCESS).json({
-      message: '제안서 정보 조회 성공',
-      data: proposal,
+// [ 1. POST Methods ]
+exports.registerProposal = async (req, res) => {
+  const body = req.body
+  const proposal = await proposalServices.createProposal(body)
+  if (proposal) {
+    res.status(STATUS_CODE.CREATED).json({
+      status: 'success',
+      message: '제안서 등록 성공',
+      data: [proposal],
     })
-  } catch (error) {
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
+  } else {
+    res.status(STATUS_CODE.BAD_REQUEST).json({
+      status: 'failed',
+      message: '제안서 등록에 실패했습니다',
+      data: [],
+    })
+  }
+}
+exports.registerWithFile = async (req, res) => {
+  const { location } = req.file
+  const body = {
+    ...req.body,
+    after_src: location,
+  }
+  const proposal = await proposalServices.createProposal(body)
+  if (proposal) {
+    res.status(STATUS_CODE.CREATED).json({
+      status: 'success',
+      message: '제안서 등록 성공',
+      data: [proposal],
+    })
+  } else {
+    res.status(STATUS_CODE.BAD_REQUEST).json({
+      status: 'failed',
+      message: '제안서 등록에 실패했습니다',
+      data: [],
+    })
   }
 }
 
-/*
-    GET /api/proposal/user/:userId
-    * 유저의 제안서 정보 조회 API
-*/
-exports.getProposalByUserId = async (req, res, next) => {
-  try {
-    const { userId } = req.params
-    const proposal = await proposalServices.getProposalByUserId(userId)
+// [ 2. GET Methods ]
+exports.getProposalList = async (req, res) => {
+  const proposalList = await proposalServices.findAllProposal()
+  if (proposalList && proposalList.length > 0) {
     res.status(STATUS_CODE.SUCCESS).json({
-      message: '제안서 정보 조회 성공',
-      data: proposal,
-    })
-  } catch (error) {
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
-  }
-}
-
-/*
-    PATCH /api/proposal/:id
-    * 제안서 정보 수정 API
-*/
-exports.editProposal = async (req, res, next) => {
-  try {
-    const params = req.body
-    const proposal = await proposalServices.editProposal(params)
-
-    res.status(STATUS_CODE.SUCCESS).json({
-      message: '제안서 정보 수정 성공',
-      data: proposal,
-    })
-  } catch (error) {
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
-  }
-}
-
-exports.editProposalStatus = async (req, res, next) => {
-  try {
-    const { id } = req.params
-    const params = req.body
-    const proposal = await proposalServices.editProposalStatus({
-      ...params,
-      id,
-    })
-    res.status(STATUS_CODE.SUCCESS).json({
-      message: '제안서 상태 정보 수정 성공',
-      data: { proposal },
-    })
-  } catch (error) {
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
-  }
-}
-
-/*
-    DELETE /api/proposal/:id
-    * 제안서 정보 삭제 API
-*/
-exports.deleteProposal = async (req, res, next) => {
-  try {
-    const { id } = req.params
-    const proposal = await proposalServices.deleteProposal(id)
-
-    res.status(STATUS_CODE.SUCCESS).json({
-      message: '제안서 정보 삭제 성공',
-      data: proposal,
-    })
-  } catch (error) {
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
-  }
-}
-
-/*
-    GET /api/proposal/list
-    * 전체 제안서 목록 조회 API
-*/
-exports.getProposals = async (req, res, next) => {
-  try {
-    const proposals = await proposalServices.getProposalList()
-
-    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'success',
       message: '전체 제안서 목록 조회 성공',
-      data: proposals,
+      data: proposalList,
     })
-  } catch (error) {
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
+  } else {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'empty',
+      message: '조회할 전체 제안서 목록이 없습니다',
+      data: [],
+    })
+  }
+}
+exports.getProposal = async (req, res) => {
+  const { id } = req.params
+  const proposal = await proposalServices.findOneProposal(id)
+  if (proposal) {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'success',
+      message: '제안서 정보 조회 성공',
+      data: [proposal],
+    })
+  } else {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'empty',
+      message: '조회할 제안서 정보가 없습니다',
+      data: [],
+    })
+  }
+}
+exports.getProposalByUserId = async (req, res) => {
+  const { id } = req.params
+  const proposal = await proposalServices.findOneProposalByUserId(id)
+  if (proposal) {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'success',
+      message: '유저의 제안서 정보 조회 성공',
+      data: [proposal],
+    })
+  } else {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'empty',
+      message: '조회할 유저의 제안서 정보가 없습니다',
+      data: [],
+    })
   }
 }
 
-/*
-    POST /api/proposal/register
-    * 제안서 등록 API
-*/
-exports.registerProposal = async (req, res, next) => {
-  try {
-    const {
-      user_id,
-      before_src,
-      after_src,
-      price_limit,
-      distance_limit,
-      keywords,
-      description,
-      status,
-    } = req.body
-    const proposal = {
-      user_id,
-      before_src,
-      after_src,
-      price_limit: Number(price_limit),
-      distance_limit: Number(distance_limit),
-      keywords: String(keywords),
-      description,
-      status,
-    }
-    const result = await proposalServices.registerProposal(proposal)
+// [ 3. PATCH Methods ]
+exports.patchProposal = async (req, res) => {
+  const { id } = req.params
+  const body = req.body
+  const patchedProposalCount = await proposalServices.updateProposal(id, body)
+  if (patchedProposalCount) {
     res.status(STATUS_CODE.SUCCESS).json({
-      message: '제안서 등록 성공',
-      data: result.id,
+      status: 'success',
+      message: '제안서 상태 정보 수정 성공',
+      data: patchedProposalCount,
     })
-  } catch (error) {
-    console.log(error)
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
+  } else {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'empty',
+      message: '수정된 제안서 상태 정보가 없습니다',
+      data: patchedProposalCount,
+    })
+  }
+}
+exports.patchWithFile = async (req, res) => {
+  const { id } = req.params
+  const { location } = req.file
+  const body = {
+    ...req.body,
+    after_src: location,
+  }
+  const patchedProposalCount = await proposalServices.updateProposal(id, body)
+  if (patchedProposalCount) {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'success',
+      message: '제안서 상태 정보 수정 성공',
+      data: patchedProposalCount,
+    })
+  } else {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'empty',
+      message: '수정된 제안서 상태 정보가 없습니다',
+      data: patchedProposalCount,
+    })
   }
 }
 
-exports.registerProposalWithFile = async (req, res, next) => {
-  try {
-    const {
-      user_id,
-      before_src,
-      after_src,
-      price_limit,
-      distance_limit,
-      keywords,
-      description,
-      status,
-    } = req.body
-    const { location } = req.file
-    const proposal = {
-      user_id,
-      before_src,
-      after_src: location,
-      price_limit: Number(price_limit),
-      distance_limit: Number(distance_limit),
-      keywords: String(keywords),
-      description,
-      status,
-    }
-    const result = await proposalServices.registerProposal(proposal)
+// [ 4. DELETE Methods]
+exports.deleteProposal = async (req, res) => {
+  const { id } = req.params
+  const deletedProposalCount = await proposalServices.destroyProposal(id)
+  if (deletedProposalCount) {
     res.status(STATUS_CODE.SUCCESS).json({
-      message: '제안서 등록 성공',
-      data: result.id,
+      status: 'success',
+      message: '제안서 정보 삭제 성공',
+      data: deletedProposalCount,
     })
-  } catch (error) {
-    console.log(error)
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
+  } else {
+    res.status(STATUS_CODE.NOT_FOUND).json({
+      status: 'failed',
+      message: '삭제할 제안서 정보가 없습니다',
+      data: deletedProposalCount,
+    })
   }
 }

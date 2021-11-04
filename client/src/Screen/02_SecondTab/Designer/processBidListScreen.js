@@ -1,16 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ScrollView, Alert } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import { StyleSheet, View, ScrollView, Alert, Text } from 'react-native';
+
+import { getMatchingListByDesignerId } from '../../../Contexts/Designer/Matching';
+
+import Line from '../../../Components/Common/line';
+import Loading from '../../../Components/Common/loading';
 import ItemHeader from '../../../Components/ListItem/itemHeader';
 import ItemContent from '../../../Components/ListItem/itemContent';
 import ItemBottomBtn from '../../../Components/ListItem/itemBottomBtn';
-import Line from '../../../Components/Common/line';
+import NoWaitBidListScreen from './noWaitBidListScreen';
 
-function ProcessBidListScreen({ navigation, bidList }) {
-  const [waitBidList, setWaitBidList] = useState([]);
+function ProcessBidListScreen({ navigation }) {
+  const dispatch = useDispatch();
+  const { data: userInfo } = useSelector((state) => state.user);
+
+  const {
+    data: matchingList,
+    loading: matchingLoading,
+    error: matchingError,
+  } = useSelector((state) => state.designerMatching);
+
   useEffect(() => {
-    const newBidList = bidList.filter((bid) => bid.status === 'process' || bid.status === 'cancel');
-    setWaitBidList([...newBidList]);
-  }, []);
+    dispatch(getMatchingListByDesignerId(userInfo.id));
+  }, [dispatch]);
 
   const cancelAlert = (id) => {
     Alert.alert('정말 취소하시겠습니까?', '취소후에는 변경이 불가능합니다', [
@@ -81,25 +94,45 @@ function ProcessBidListScreen({ navigation, bidList }) {
       });
   };
 
+  if (matchingLoading || matchingError || !matchingList) return <Loading />;
+
+  if (!matchingList.length) {
+    return <NoWaitBidListScreen navigation={navigation} />;
+  }
   return (
     <ScrollView style={styles.container}>
-      {waitBidList.map((bid, index) => (
+      {matchingList.map((matching, index) => (
         <View style={styles.bidContainer} key={index}>
           <ItemHeader
-            info={bid}
-            screen="bid"
+            info={matching}
+            screen="matching"
             clickHandler={() => {
-              navigation.navigate('DetailBid', { info: bid });
+              navigation.push('DetailBid', {
+                info: {
+                  ...matching,
+                  length_type: matching.bid.length_type,
+                  style_type: matching.bid.style_type,
+                  need_care: matching.bid.need_care,
+                  letter: matching.bid.letter,
+                },
+                screen: 'matching',
+              });
             }}
           />
-          <ItemContent navigation={navigation} info={bid} screen="bid" />
-          <ItemBottomBtn
-            info={bid}
-            leftBtnText="취소됨"
-            leftBtnHandler={() => cancelAlert(bid.id)}
-            rightBtnText="시술 완료"
-            rightBtnHandler={() => doneAlert(bid)}
-          />
+          <ItemContent navigation={navigation} info={matching} screen="matching" />
+          {matching.reserved ? (
+            <ItemBottomBtn
+              info={matching}
+              leftBtnText="취소됨"
+              leftBtnHandler={() => cancelAlert(matching.id)}
+              rightBtnText="시술 완료"
+              rightBtnHandler={() => doneAlert(matching)}
+            />
+          ) : (
+            <View style={styles.waitReservation}>
+              <Text style={styles.reservationText}>아직 유저가 예약 정보를 입력하지 않았어요!</Text>
+            </View>
+          )}
           <Line />
         </View>
       ))}
@@ -110,6 +143,13 @@ function ProcessBidListScreen({ navigation, bidList }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  waitReservation: {
+    alignItems: 'center',
+    padding: 15,
+  },
+  reservationText: {
+    color: '#8D8D8D',
   },
 });
 

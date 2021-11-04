@@ -1,117 +1,82 @@
-const { User } = require('../../models')
+const { User, ScheduleInfo } = require('../../models')
 const { Sequelize } = require('sequelize')
 const { and, or, like, not } = Sequelize.Op
 
-exports.selectUser = async (userId) => {
-  const results = await User.findOne({
+// Create User Resource [create]
+exports.createUser = async (attr) => {
+  const user = await User.create({
     raw: true,
-    where: {
-      id: userId,
-    },
+    ...attr,
+    authentication: false,
+    ai_status: false,
+    ai_process: false,
+    ai_count: 0,
   })
-
-  return results
+  return user
 }
 
-exports.selectUserByToken = async (token) => {
-  const results = await User.findOne({
-    raw: true,
-    where: {
-      [or]: [{ naver_token: token }, { kakao_token: token }],
-    },
+// Read User Resource [findOne, findAll]
+exports.findAllUser = async () => {
+  const userList = await User.findAll({
+    order: [['id', 'ASC']],
   })
-  return results
+  return userList
 }
-
-exports.updateUser = async ({
-  id,
-  type,
-  naver_token,
-  kakao_token,
-  name,
-  email,
-  address,
-  lat,
-  lng,
-  img_src,
-  ai_status,
-}) => {
-  const results = await User.update({
-    raw: true,
-    type,
-    naver_token,
-    kakao_token,
-    name,
-    email,
-    address,
-    lat,
-    lng,
-    img_src,
-    ai_status,
+exports.findOneUser = async (id) => {
+  const user = await User.findOne({
     where: {
       id,
     },
   })
-
-  return results
+  return user
 }
-
-exports.destroyUser = async (userId) => {
-  const results = await User.destroy({
+exports.findOneUserByToken = async (token) => {
+  const user = await User.findOne({
     where: {
-      id: userId,
+      [or]: [
+        { naver_token: token },
+        { kakao_token: token },
+        { apple_token: token },
+      ],
     },
+    include: [
+      {
+        model: ScheduleInfo,
+        attributes: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
+      },
+    ],
   })
-
-  return results
+  return user
 }
-
-exports.selectAllUser = async () => {
-  const results = await User.findAll({
+exports.findLastUser = async () => {
+  const user = await User.findOne({
     raw: true,
+    limit: 1,
+    order: [['id', 'DESC']],
   })
-
-  return results
+  return user
 }
 
-exports.insertUser = async ({
-  type,
-  naver_token,
-  kakao_token,
-  name,
-  email,
-  address,
-  lat,
-  lng,
-  img_src,
-  gender,
-  birth,
-  phone_number,
-  nick_name,
-}) => {
-  const results = await User.create({
-    raw: true,
-    type,
-    naver_token,
-    kakao_token,
-    name,
-    email,
-    address,
-    lat,
-    lng,
-    img_src,
-    gender,
-    nick_name,
-    birth,
-    phone_number,
-    ai_status: 'wait',
-  })
-  return results
-}
-
-exports.updateAiStatus = async ({ id, ai_status }) => {
-  const results = await User.update(
+// Update User Resource [update]
+exports.updateUser = async (id, body) => {
+  const user = await User.update(
     {
+      raw: true,
+      ...body,
+    },
+    {
+      where: {
+        id,
+      },
+    }
+  )
+  return user[0]
+}
+
+exports.updateUserAiStatus = async (id, ai_status) => {
+  const user = await User.update(
+    {
+      raw: true,
       ai_status,
     },
     {
@@ -120,6 +85,15 @@ exports.updateAiStatus = async ({ id, ai_status }) => {
       },
     }
   )
+  return user[0]
+}
 
-  return results
+// Delete User Resource [destroy]
+exports.destroyUser = async (id) => {
+  const user = await User.destroy({
+    where: {
+      id,
+    },
+  })
+  return user
 }

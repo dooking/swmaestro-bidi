@@ -1,26 +1,85 @@
-export const STORAGE_KEY = 'user';
+// export const SERVER_URL = 'http://127.0.0.1:3000/api';
+export const SERVER_URL = 'http://13.125.215.51/api';
 
-export const LARGE_CATEGORY = [
-  { label: '커트', value: '커트', key: 1 },
-  { label: '파마', value: '파마', key: 2 },
-  { label: '염색', value: '염색', key: 3 },
+export const APP_VERSION = 'v1.0.0';
+
+export const STORAGE_KEY = 'user';
+export const LOCATION_STORAGE_KEY = 'location';
+export const CURRENT_LOCATION_STORAGE_KEY = 'current_location';
+export const SHOP_EXTRA_INFO_LIST = [
+  '주차 가능',
+  'wifi 제공',
+  '음료/간식',
+  '반려견 동반가능',
+  '공유 헤어샵',
+  '남성 전문',
+  '여성 전문',
+  '유아전용의자',
+  '대중교통 용이',
+  '심야 영업',
+  '클리닉 가능',
 ];
 
-export const SMALL_CATEGORY = {
-  미선택: ['대분류를 선택해주세요!'],
-  커트: [
-    { label: '남성 커트', value: '남성 커트', key: 4 },
-    { label: '댄디 커트', value: '댄디 커트', key: 5 },
-    { label: '다듬기', value: '다듬기', key: 6 },
+export const GENDER_TYPE = [
+  { label: '남성', value: 'male', key: '13' },
+  { label: '여성', value: 'female', key: '14' },
+];
+
+export const START_TIME_LIST = [
+  { label: '9:00', value: '9' },
+  { label: '9:30', value: '9.5' },
+  { label: '10:00', value: '10' },
+  { label: '10:30', value: '10.5' },
+  { label: '11:00', value: '11' },
+  { label: '11:30', value: '11.5' },
+  { label: '12:00', value: '12' },
+  { label: '12:30', value: '12.5' },
+  { label: '13:00', value: '13' },
+  { label: '13:30', value: '13.5' },
+  { label: '14:00', value: '14' },
+  { label: '14:30', value: '14.5' },
+];
+export const END_TIME_LIST = [
+  { label: '15:00', value: '15' },
+  { label: '15:30', value: '15.5' },
+  { label: '16:00', value: '16' },
+  { label: '16:30', value: '16.5' },
+  { label: '17:00', value: '17' },
+  { label: '17:30', value: '17.5' },
+  { label: '18:00', value: '18' },
+  { label: '18:30', value: '18.5' },
+  { label: '19:00', value: '19' },
+  { label: '19:30', value: '19.5' },
+  { label: '20:00', value: '20' },
+  { label: '20:30', value: '20.5' },
+  { label: '21:00', value: '21' },
+  { label: '21:30', value: '21.5' },
+  { label: '22:00', value: '22' },
+  { label: '22:30', value: '22.5' },
+];
+
+export const LENGTH_TYPE = [
+  { label: '롱', value: 'long', key: '1' },
+  { label: '미디엄', value: 'medium', key: '2' },
+  { label: '단발', value: 'short', key: '3' },
+];
+
+export const STYLE_TYPE = {
+  미선택: [{ label: '미선택', value: '미선택', key: '0' }],
+  long: [
+    { label: '커트', value: 'cut', key: '4' },
+    { label: '파마', value: 'perm', key: '5' },
+    { label: '염색', value: 'color', key: '6' },
   ],
-  파마: [
-    { label: '뿌리 파마', value: '뿌리 파마', key: 7 },
-    { label: '볼륨 파마', value: '볼륨 파마', key: 8 },
-    { label: '가르마 파마', value: '가르마 파마', key: 9 },
+  medium: [
+    { label: '커트', value: 'cut', key: '7' },
+    { label: '파마', value: 'perm', key: '8' },
+    { label: '염색', value: 'color', key: '9' },
   ],
-  염색: [
-    { label: '기본 염색', value: '기본 염색', key: 10 },
-    { label: '프리미엄 염색', value: '프리미엄 염색', key: 11 },
+  short: [
+    { label: '커트', value: 'cut', key: '10' },
+    { label: '파마', value: 'perm', key: '11' },
+    { label: '염색', value: 'color', key: '12' },
   ],
 };
 
@@ -28,6 +87,65 @@ export const DISTANCE_CATEGORY = [
   { label: '1km 이내', value: '1', key: 1 },
   { label: '3km 이내', value: '3', key: 2 },
   { label: '5km 이내', value: '5', key: 3 },
+];
+
+export const DATE_SKELETON = [
+  {
+    id: 0,
+    selected: false,
+  },
+  {
+    id: 1,
+    selected: false,
+  },
+  {
+    id: 2,
+    selected: false,
+  },
+  {
+    id: 3,
+    selected: false,
+  },
+  {
+    id: 4,
+    selected: false,
+  },
+  {
+    id: 5,
+    selected: false,
+  },
+  {
+    id: 6,
+    selected: false,
+  },
+  {
+    id: 7,
+    selected: false,
+  },
+  {
+    id: 8,
+    selected: false,
+  },
+  {
+    id: 9,
+    selected: false,
+  },
+  {
+    id: 10,
+    selected: false,
+  },
+  {
+    id: 11,
+    selected: false,
+  },
+  {
+    id: 12,
+    selected: false,
+  },
+  {
+    id: 13,
+    selected: false,
+  },
 ];
 
 export const KEYWORDS = [
@@ -190,7 +308,6 @@ export const STYLE_INFO = {
       styleName: '볼륨매직',
     },
   ],
-
   female: [
     {
       id: 'style26',

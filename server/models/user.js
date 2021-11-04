@@ -8,8 +8,8 @@ const modelAttributes = {
     primaryKey: true,
     autoIncrement: true,
   },
-  type: {
-    type: DataTypes.STRING,
+  user_type: {
+    type: DataTypes.ENUM('customer', 'designer'),
   },
   naver_token: {
     type: DataTypes.STRING,
@@ -17,13 +17,13 @@ const modelAttributes = {
   kakao_token: {
     type: DataTypes.STRING,
   },
-  nick_name: {
+  apple_token: {
     type: DataTypes.STRING,
   },
   name: {
     type: DataTypes.STRING,
   },
-  email: {
+  nick_name: {
     type: DataTypes.STRING,
   },
   phone_number: {
@@ -32,23 +32,25 @@ const modelAttributes = {
   birth: {
     type: DataTypes.STRING,
   },
-  gender: {
-    type: DataTypes.STRING,
-  },
-  address: {
-    type: DataTypes.STRING,
-  },
-  lat: {
-    type: DataTypes.FLOAT,
-  },
-  lng: {
-    type: DataTypes.FLOAT,
+  gender_type: {
+    type: DataTypes.ENUM('female', 'male'),
   },
   img_src: {
     type: DataTypes.STRING,
   },
+
+  // Status Attributes
+  authentication: {
+    type: DataTypes.BOOLEAN,
+  },
   ai_status: {
-    type: DataTypes.STRING,
+    type: DataTypes.BOOLEAN,
+  },
+  ai_process: {
+    type: DataTypes.BOOLEAN,
+  },
+  ai_count: {
+    type: DataTypes.INTEGER,
   },
   created_at: {
     type: DataTypes.DATE,

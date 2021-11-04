@@ -14,22 +14,38 @@ const modelAttributes = {
   title: {
     type: DataTypes.STRING,
   },
-  subtitle: {
+  description: {
     type: DataTypes.STRING,
   },
   price: {
     type: DataTypes.INTEGER,
   },
-  gender: {
+  gender_type: {
+    type: DataTypes.ENUM('female', 'male'),
+  },
+  style_type: {
+    type: DataTypes.ENUM('cut', 'perm', 'color'),
+  },
+  length_type: {
+    type: DataTypes.ENUM('long', 'medium', 'short'),
+  },
+  keyword_array: {
     type: DataTypes.STRING,
   },
-  img_src: {
+  front_img_src: {
     type: DataTypes.STRING,
   },
-  categories: {
+  side_img_src: {
+    type: DataTypes.STRING,
+  },
+  back_img_src: {
     type: DataTypes.STRING,
   },
 
+  // Status Attribute
+  ai_enable: {
+    type: DataTypes.BOOLEAN,
+  },
   created_at: {
     type: DataTypes.DATE,
     allowNull: false,

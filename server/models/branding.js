@@ -15,6 +15,9 @@ const modelAttributes = {
     type: DataTypes.STRING,
   },
   description: {
+    type: DataTypes.TEXT,
+  },
+  keyword_array: {
     type: DataTypes.STRING,
   },
   shop_name: {
@@ -23,16 +26,24 @@ const modelAttributes = {
   position: {
     type: DataTypes.STRING,
   },
+  operation_time: {
+    type: DataTypes.STRING,
+  },
+  break_time: {
+    type: DataTypes.STRING,
+  },
+  shop_number: {
+    type: DataTypes.STRING,
+  },
   address: {
     type: DataTypes.STRING,
   },
-  keywords: {
+  extra_info: {
     type: DataTypes.STRING,
   },
+
+  // Status Attribute
   main: {
-    type: DataTypes.BOOLEAN,
-  },
-  authentication: {
     type: DataTypes.BOOLEAN,
   },
   created_at: {

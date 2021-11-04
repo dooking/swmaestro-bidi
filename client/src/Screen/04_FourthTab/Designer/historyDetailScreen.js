@@ -1,36 +1,42 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+
+import { STYLE_TYPE, LENGTH_TYPE } from '../../../Lib/constant';
+
 import CardInfo from '../../../Components/Card/cardInfo';
-import CardDisableStyle from '../../../Components/Card/cardDisableStyle';
 import CardStyle from '../../../Components/Card/cardStyle';
+import CardDisableStyle from '../../../Components/Card/cardDisableStyle';
+
 import BidCategory from '../../../Components/Bid/bidCategory';
 import BidLetter from '../../../Components/Bid/bidLetter';
 import BidNeedCare from '../../../Components/Bid/bidNeedCare';
 import BidRefStyle from '../../../Components/Bid/bidRefStyle';
-import BidiStorage from '../../../Lib/storage';
-import { LARGE_CATEGORY, SMALL_CATEGORY, STORAGE_KEY } from '../../../Lib/constant';
 
 function HistoryDetailScreen({ navigation, route }) {
   const { info } = route.params;
+
+  const dispatch = useDispatch();
   const [isEdit, setIsEdit] = useState(false);
-  const [largeCategoryOpen, setLargeCategoryOpen] = useState(false);
-  const [largeCategoryValue, setLargeCategoryValue] = useState(info.bid.large_category);
-  const [largeCategoryItems, setLargeCategoryItems] = useState(LARGE_CATEGORY);
-  const [smallCategoryOpen, setSmallCategoryOpen] = useState(false);
-  const [smallCategoryValue, setSmallCategoryValue] = useState(info.bid.small_category);
-  const [smallCategoryItems, setSmallCategoryItems] = useState([]);
+  const [lengthTypeOpen, setLengthTypeOpen] = useState(false);
+  const [lengthTypeValue, setLengthTypeValue] = useState(info.bid.length_type);
+  const [lengthTypeItems, setLengthTypeItems] = useState(LENGTH_TYPE);
+  const [styleTypeOpen, setStyleTypeOpen] = useState(false);
+  const [styleTypeValue, setStyleTypeValue] = useState(info.bid.style_type);
+  const [styleTypeItems, setStyleTypeItems] = useState([]);
+
+  const [styleMenuList, setStyleMenuList] = useState(info.bid.bidStyles);
   const [needCare, setNeedCare] = useState(info.bid.need_care);
   const [bidLetter, setBidLetter] = useState(info.bid.letter);
 
   useEffect(() => {
-    setSmallCategoryItems(SMALL_CATEGORY[largeCategoryValue]);
-  }, [largeCategoryValue]);
-
+    setStyleTypeItems(STYLE_TYPE[lengthTypeValue]);
+  }, [lengthTypeValue]);
   return (
     <View style={styles.container}>
       <ScrollView>
-        {info.bid.status === 'done' || info.bid.status === 'cancel' ? (
-          <CardDisableStyle styleImage={info.proposal.after_src} status={info.bid.status} />
+        {info.bid.matching === true ? (
+          <CardDisableStyle styleImage={info.proposal.after_src} matched={info.bid.matching} />
         ) : (
           <CardStyle
             styleLists={[info.proposal.before_src, info.proposal.after_src]}
@@ -43,9 +49,9 @@ function HistoryDetailScreen({ navigation, route }) {
           info={{
             ...info,
             description: info.proposal.description,
-            name: info.customer.name,
-            address: info.customer.address,
-            img_src: info.customer.img_src,
+            name: info.proposal.user.name,
+            address: info.proposal.user.address,
+            img_src: info.proposal.user.img_src,
             distance_limit: info.proposal.distance_limit,
           }}
           navigation={navigation}
@@ -60,23 +66,30 @@ function HistoryDetailScreen({ navigation, route }) {
         </View>
         <View style={styles.line}></View>
         <BidCategory
-          largeCategoryOpen={largeCategoryOpen}
-          setLargeCategoryOpen={setLargeCategoryOpen}
-          largeCategoryValue={largeCategoryValue}
-          setLargeCategoryValue={setLargeCategoryValue}
-          largeCategoryItems={largeCategoryItems}
-          setLargeCategoryItems={setLargeCategoryItems}
-          smallCategoryOpen={smallCategoryOpen}
-          setSmallCategoryOpen={setSmallCategoryOpen}
-          smallCategoryValue={smallCategoryValue}
-          setSmallCategoryValue={setSmallCategoryValue}
-          smallCategoryItems={smallCategoryItems}
-          setSmallCategoryItems={setSmallCategoryItems}
+          lengthTypeOpen={lengthTypeOpen}
+          setLengthTypeOpen={setLengthTypeOpen}
+          lengthTypeValue={lengthTypeValue}
+          setLengthTypeValue={setLengthTypeValue}
+          lengthTypeItems={lengthTypeItems}
+          setLengthTypeItems={setLengthTypeItems}
+          styleTypeOpen={styleTypeOpen}
+          setStyleTypeOpen={setStyleTypeOpen}
+          styleTypeValue={styleTypeValue}
+          setStyleTypeValue={setStyleTypeValue}
+          styleTypeItems={styleTypeItems}
+          setStyleTypeItems={setStyleTypeItems}
           isEdit={isEdit}
         />
         <BidNeedCare needCare={needCare} setNeedCare={setNeedCare} isEdit={isEdit} />
         <BidLetter bidLetter={bidLetter} setBidLetter={setBidLetter} isEdit={isEdit} />
-        <BidRefStyle />
+        <BidRefStyle
+          navigation={navigation}
+          title="추천 스타일"
+          styleMenuList={styleMenuList}
+          setStyleMenuList={setStyleMenuList}
+          nextTo="DetailBid"
+          isEdit={isEdit}
+        />
       </ScrollView>
     </View>
   );

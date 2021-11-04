@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, Image } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-function UserInfo({ info, keywords }) {
+function UserInfo({ info, keyword_array }) {
   return (
     <View style={styles.userContainer}>
       <View style={styles.userInfo}>
@@ -14,7 +14,7 @@ function UserInfo({ info, keywords }) {
         />
         <View style={styles.userBox}>
           <View style={styles.userNameArea}>
-            <Text style={styles.userName}>{info.name}</Text>
+            <Text style={styles.userName}>{info.nick_name}</Text>
           </View>
           <View style={styles.shopInfo}>
             <Ionicons name="location-outline" size={15} />
@@ -23,10 +23,10 @@ function UserInfo({ info, keywords }) {
         </View>
       </View>
       <View style={styles.userTag}>
-        {keywords != '' ? (
-          keywords.map((item, index) => (
+        {keyword_array && keyword_array.length > 0 ? (
+          keyword_array.map((item, index) => (
             <View style={styles.tag} key={index}>
-              <Text style={{ color: '#8D8D8D' }}># {item}</Text>
+              <Text style={{ color: '#8D8D8D' }}>{item}</Text>
             </View>
           ))
         ) : (
@@ -78,7 +78,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: '75%',
   },
   userName: {
     fontSize: 25,

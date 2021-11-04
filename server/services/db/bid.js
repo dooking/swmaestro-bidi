@@ -1,137 +1,49 @@
 const { Bid, BidStyle, User, Style, Proposal } = require('../../models')
+const { Sequelize } = require('sequelize')
+const { and, or, like, not } = Sequelize.Op
 
-exports.updateBid = async ({
-  id,
-  large_category,
-  small_category,
-  letter,
-  need_care,
-  status,
-}) =>
-  await Bid.update(
-    {
-      raw: true,
-      large_category,
-      small_category,
-      letter,
-      need_care,
-      status,
-    },
-    {
-      where: {
-        id,
-      },
-    }
-  )
-    .then((results) => {
-      console.log('Success Updating Bid')
-      return results
-    })
-    .catch((err) => {
-      console.log(err)
-      console.log('Failed Updating Bid')
-      return err
-    })
-
-exports.updateBidStatus = async ({ id, status }) =>
-  await Bid.update(
-    {
-      raw: true,
-      status,
-    },
-    {
-      where: {
-        id,
-      },
-    }
-  )
-    .then((results) => {
-      console.log('Success Updating Bid Status')
-      return results
-    })
-    .catch((err) => {
-      console.log(err)
-      console.log('Failed Updating Bid Status')
-      return err
-    })
-
-exports.updateBidStatusWithProposal = async ({ proposalId, status }) =>
-  await Bid.update(
-    {
-      raw: true,
-      status,
-    },
-    {
-      where: {
-        proposal_id: proposalId,
-      },
-    }
-  )
-    .then((results) => {
-      console.log('Success Updating Bid Status')
-      return results
-    })
-    .catch((err) => {
-      console.log(err)
-      console.log('Failed Updating Bid Status')
-      return err
-    })
-
-exports.destroyBid = async (bidId) =>
-  await Bid.destroy({
-    where: {
-      id: bidId,
-    },
+// Create Bid Resource [create]
+exports.createBid = async (attr) => {
+  const bid = await Bid.create({
+    raw: true,
+    ...attr,
+    matching: false,
+    canceled: false,
   })
-    .then((results) => {
-      console.log('Success Destroying Bid')
-      return results
-    })
-    .catch((err) => {
-      console.log('Failed Destroying Bid')
-      return err
-    })
+  return bid
+}
+exports.createBidStyle = async (attr) => {
+  const bidStyle = await BidStyle.create({
+    raw: true,
+    ...attr,
+  })
+  return bidStyle
+}
 
-exports.selectAllBidByDesignerId = async (userId) =>
-  await Bid.findAll({
+// Read Bid Resource [findOne, findAll]
+exports.findAllBidByDesignerId = async (id) => {
+  const bidList = await Bid.findAll({
     where: {
-      designer_id: userId,
+      designer_id: id,
+      matching: false,
     },
     include: [
+      {
+        model: User,
+        attributes: ['name', 'nick_name', 'gender_type', 'img_src'],
+        required: true,
+      },
       {
         model: Proposal,
         required: true,
         include: [
           {
             model: User,
-            attributes: ['id', 'name', 'img_src', 'address'],
+            attributes: ['name', 'nick_name', 'gender_type', 'img_src'],
             required: true,
           },
         ],
       },
-    ],
-    order: [['created_at', 'ASC']],
-  })
-    .then((results) => {
-      console.log('Success Selecting All Bid')
-      return results
-    })
-    .catch((err) => {
-      console.log(err)
-      console.log('Failed Selecting All Bid')
-      return err
-    })
-
-exports.selectAllBidByCustomerId = async (userId) =>
-  await Bid.findAll({
-    where: {
-      customer_id: userId,
-    },
-    include: [
-      {
-        model: Proposal,
-        required: true,
-      },
       {
         model: Style,
         as: 'bidStyles',
@@ -140,60 +52,68 @@ exports.selectAllBidByCustomerId = async (userId) =>
         },
       },
     ],
+    order: [['updated_at', 'DESC']],
   })
-    .then((results) => {
-      console.log('Success Selecting All Bid')
-      return results
-    })
-    .catch((err) => {
-      console.log('Failed Selecting All Bid')
-      return err
-    })
-
-// DM
-exports.selectAllDMBidByCustomerId = async (userId) =>
-  await Bid.findAll({
+  return bidList
+}
+exports.findAllBidByCustomerId = async (id) => {
+  const bidList = await Bid.findAll({
     where: {
-      customer_id: userId,
+      customer_id: id,
+      matching: false,
+      canceled: false,
     },
     include: [
       {
         model: User,
-        attributes: ['id', 'name', 'img_src', 'address'],
-        required: false,
+        attributes: ['name', 'nick_name', 'gender_type', 'img_src'],
+        required: true,
+      },
+      {
+        model: Proposal,
+        required: true,
+        include: [
+          {
+            model: User,
+            attributes: ['name', 'nick_name', 'gender_type', 'img_src'],
+            required: true,
+          },
+        ],
+      },
+      {
+        model: Style,
+        as: 'bidStyles',
+        through: {
+          model: BidStyle,
+        },
       },
     ],
+    order: [['updated_at', 'DESC']],
   })
-    .then((results) => {
-      console.log('Success Selecting DM All Bid')
-      return results
-    })
-    .catch((err) => {
-      console.log('Failed Selecting DM All Bid')
-      return err
-    })
-
-exports.selectAllDMBidByDesignerId = async (userId) =>
-  await Bid.findAll({
+  return bidList
+}
+exports.findOneBid = async (id) => {
+  const bid = await Bid.findOne({
     where: {
-      designer_id: userId,
-    },
-  })
-    .then((results) => {
-      console.log('Success Selecting DM All Bid')
-      return results
-    })
-    .catch((err) => {
-      console.log('Failed Selecting DM All Bid')
-      return err
-    })
-
-exports.selectBidByCustomerId = async (bidId) =>
-  await Bid.findOne({
-    where: {
-      id: bidId,
+      id,
     },
     include: [
+      {
+        model: User,
+        attributes: ['name', 'nick_name', 'gender_type', 'img_src'],
+        required: true,
+      },
+      {
+        model: Proposal,
+        required: true,
+        include: [
+          {
+            model: User,
+            attributes: ['name', 'nick_name', 'gender_type', 'img_src'],
+            required: true,
+          },
+        ],
+      },
       {
         model: Style,
         as: 'bidStyles',
@@ -203,57 +123,84 @@ exports.selectBidByCustomerId = async (bidId) =>
       },
     ],
   })
-    .then((results) => {
-      console.log('Success Selecting One Bid')
-      return results
-    })
-    .catch((err) => {
-      console.log('Failed Selecting One Bid')
-      return err
-    })
+  return bid
+}
 
-exports.insertBid = async ({
-  customer_id,
-  designer_id,
-  proposal_id,
-  large_category,
-  small_category,
-  letter,
-  need_care,
-  status,
-}) =>
-  await Bid.create({
-    raw: true,
-    customer_id,
-    designer_id,
-    proposalId: proposal_id,
-    large_category,
-    small_category,
-    letter,
-    need_care,
-    status,
-  })
-    .then((results) => {
-      console.log('Success Creating Bid')
-      return results
-    })
-    .catch((err) => {
-      console.log(err)
-      console.log('Failed Creating Bid')
-      return err
-    })
+// Update Bid Resource [update]
+exports.updateBid = async (id, attr) => {
+  const bid = await Bid.update(
+    {
+      raw: true,
+      ...attr,
+    },
+    {
+      where: {
+        id,
+      },
+    }
+  )
+  return bid[0]
+}
 
-exports.insertBidStyle = async (bidId, styleId) =>
-  await BidStyle.create({
-    raw: true,
-    bidId,
-    styleId,
+exports.updateBidMatching = async (id) => {
+  const bid = await Bid.update(
+    {
+      raw: true,
+      matching: true,
+      canceled: false,
+    },
+    {
+      where: {
+        id,
+      },
+    }
+  )
+  return bid[0]
+}
+exports.updateBidCanceled = async (id) => {
+  const bid = await Bid.update(
+    {
+      raw: true,
+      canceled: true,
+    },
+    {
+      where: {
+        id,
+      },
+    }
+  )
+  return bid[0]
+}
+exports.updateBidCancelElseByCustomerId = async (id) => {
+  const bid = await Bid.update(
+    {
+      raw: true,
+      canceled: true,
+    },
+    {
+      where: {
+        customer_id: id,
+        [not]: [{ matching: true }],
+      },
+    }
+  )
+  return bid[0]
+}
+
+// Delete Bid Resource [destroy]
+exports.destroyBid = async (id) => {
+  const bid = await Bid.destroy({
+    where: {
+      id,
+    },
   })
-    .then((results) => {
-      console.log('Success Creating BidStyle')
-      return results
-    })
-    .catch((err) => {
-      console.log('Failed Creating BidStyle')
-      return err
-    })
+  return bid
+}
+exports.destroyBidStyle = async (bidId) => {
+  const bidStyle = await BidStyle.destroy({
+    where: {
+      bidId,
+    },
+  })
+  return bidStyle
+}

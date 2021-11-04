@@ -20,17 +20,19 @@ const modelAttributes = {
   price_limit: {
     type: DataTypes.INTEGER,
   },
-  distance_limit: {
-    type: DataTypes.INTEGER,
-  },
-  keywords: {
+  address: {
     type: DataTypes.STRING,
   },
   description: {
     type: DataTypes.TEXT,
   },
-  status: {
+  keyword_array: {
     type: DataTypes.STRING,
+  },
+
+  // Status Attribute
+  matching: {
+    type: DataTypes.BOOLEAN,
   },
   created_at: {
     type: DataTypes.DATE,

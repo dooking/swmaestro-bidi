@@ -7,7 +7,7 @@ import UserInfo from '../Profile/userInfo';
 import Modal from 'react-native-modal';
 import StyleModal from './styleModal';
 
-function BidModal({ userInfo, bid, setModalVisible }) {
+function BidModal({ bid, setModalVisible }) {
   const [styleModalVisible, setStyleModalVisible] = useState(false);
   const [showStyles, setShowStyles] = useState([]);
   const [styleIndex, setStyleIndex] = useState(0);
@@ -23,12 +23,11 @@ function BidModal({ userInfo, bid, setModalVisible }) {
         <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeBtnArea}>
           <Icon name="md-close" size={25} color="#8D8D8D" />
         </TouchableOpacity>
-        <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
-          <UserInfo
-            info={userInfo}
-            keywords={[bid.large_category, bid.small_category]}
-            height={150}
-          />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          bounces={false}>
+          <UserInfo info={bid.user} keywords={[bid.style_type, bid.length_type]} height={150} />
           <View>
             <View style={styles.letterArea}>
               <Text style={styles.letterText}>{bid.letter}</Text>
@@ -47,7 +46,7 @@ function BidModal({ userInfo, bid, setModalVisible }) {
                   activeOpacity={0.8}
                   style={styles.imageAfter}
                   onPress={() => styleModalOpen(index, bid.bidStyles)}>
-                  <Image style={styles.styleImg} source={{ uri: item.img_src }} />
+                  <Image style={styles.styleImg} source={{ uri: item.front_img_src }} />
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -67,7 +66,7 @@ function BidModal({ userInfo, bid, setModalVisible }) {
           styleScraps={showStyles}
           index={styleIndex}
           setModalVisible={setStyleModalVisible}
-          userInfo={userInfo}
+          userInfo={bid.user}
           deleteIcon={false}
         />
       </Modal>

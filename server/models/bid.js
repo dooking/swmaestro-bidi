@@ -8,29 +8,37 @@ const modelAttributes = {
     primaryKey: true,
     autoIncrement: true,
   },
+  proposal_id: {
+    type: DataTypes.INTEGER,
+  },
   customer_id: {
     type: DataTypes.INTEGER,
   },
   designer_id: {
     type: DataTypes.INTEGER,
   },
-  proposal_id: {
-    type: DataTypes.INTEGER,
+  style_type: {
+    type: DataTypes.ENUM('cut', 'perm', 'color'),
   },
-  large_category: {
-    type: DataTypes.STRING,
+  length_type: {
+    type: DataTypes.ENUM('long', 'medium', 'short'),
   },
-  small_category: {
+  address: {
     type: DataTypes.STRING,
   },
   letter: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
   },
   need_care: {
     type: DataTypes.BOOLEAN,
   },
-  status: {
-    type: DataTypes.STRING,
+
+  // Status Attribute
+  matching: {
+    type: DataTypes.BOOLEAN,
+  },
+  canceled: {
+    type: DataTypes.BOOLEAN,
   },
   created_at: {
     type: DataTypes.DATE,

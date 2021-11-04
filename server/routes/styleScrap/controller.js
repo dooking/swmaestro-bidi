@@ -1,60 +1,69 @@
 const styleScrapServices = require('../../services/styleScrap')
-const { STATUS_CODE, ERROR_MESSAGE } = require('../../lib/constants')
+const { STATUS_CODE } = require('../../lib/constants')
 
-/*
-    GET /api/styleScarp/:id
-    * 스타일 스크랩 조회 API
-*/
-exports.getStyleScrapList = async (req, res, next) => {
-  try {
-    const { userId } = req.params
-    const styleScrap = await styleScrapServices.getStyleScrapList(userId)
+// [ 1. POST Methods ]
+exports.registerStyleScrap = async (req, res) => {
+  const body = req.body
+  const styleScrap = await styleScrapServices.createStyleScrap(body)
+  if (styleScrap) {
     res.status(STATUS_CODE.SUCCESS).json({
-      message: '스타일 스크랩 조회 성공',
-      data: styleScrap,
-    })
-  } catch (error) {
-    console.log(error)
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
-  }
-}
-
-/*
-    DELETE /api/user/:id
-    * 사용자 정보 삭제 API
-*/
-exports.deleteStyleScrap = async (req, res, next) => {
-  try {
-    const styleScrap = await styleScrapServices.deleteStyleScrap(req.params)
-
-    res.status(STATUS_CODE.SUCCESS).json({
-      message: '스타일 스크랩 삭제 성공',
-      data: styleScrap,
-    })
-  } catch (error) {
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
-  }
-}
-
-/*
-    POST /api/user/register
-    * 회원가입 API
-*/
-exports.registerStyleScrap = async (req, res, next) => {
-  try {
-    const styleScrap = await styleScrapServices.registerStyleScrap(req.params)
-
-    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'success',
       message: '스타일 스크랩 생성 성공',
-      data: styleScrap,
+      data: [styleScrap],
     })
-  } catch (error) {
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
+  } else {
+    res.status(STATUS_CODE.BAD_REQUEST).json({
+      status: 'failed',
+      message: '스타일 스크랩 생성에 실패했습니다',
+      data: [],
+    })
+  }
+}
+
+// [ 2. GET Methods ]
+exports.getStyleScrapList = async (req, res) => {
+  const { id } = req.params
+  const styleScrapList = await styleScrapServices.findAllStyleScrap(id)
+  if (styleScrapList) {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'success',
+      message: '유저의 스타일 스크랩 목록 조회 성공',
+      data: styleScrapList,
+    })
+  } else {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'empty',
+      message: '조회할 유저의 스타일 스크랩 목록이 없습니다',
+      data: [],
+    })
+  }
+}
+
+// [ 3. PATCH Methods ]
+/*
+//
+//
+//
+//
+*/
+
+// [ 4. DELETE Methods]
+exports.deleteStyleScrap = async (req, res) => {
+  const body = req.body
+  const deletedStyleScrapCount = await styleScrapServices.destroyStyleScrap(
+    body
+  )
+  if (deletedStyleScrapCount) {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'success',
+      message: '스타일 스크랩 삭제 성공',
+      data: deletedStyleScrapCount,
+    })
+  } else {
+    res.status(STATUS_CODE.NOT_FOUND).json({
+      status: 'failed',
+      message: '삭제할 스타일 스크랩이 없습니다',
+      data: deletedStyleScrapCount,
+    })
   }
 }

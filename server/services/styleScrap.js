@@ -1,52 +1,53 @@
-const style = require('../models/style')
 const db = require('./db/styleScrap')
 
-const registerStyleScrap = async (params) => {
-  const styleScrap = await db.insertStyleScrap({ ...params })
-  return styleScrap
-}
-
-const deleteStyleScrap = async (params) => {
-  const styleScrap = await db.destroyStyleScrap({ ...params })
-  return styleScrap
-}
-
-const getStyleScrapList = async (userId) => {
-  let styleScrapList = []
-
-  const userStyleScrapList = await db.selectStyleScrapByUser(userId)
-  for (const styleScrap of userStyleScrapList.styleScraps) {
-    const tmpScrap = makeStyleScrapData(styleScrap.dataValues)
-    styleScrapList.push(tmpScrap)
+// Create StyleScrap Resource [create]
+exports.createStyleScrap = async (body) => {
+  const attr = {
+    userId: body.user_id,
+    styleId: body.style_id,
   }
-  return styleScrapList
-}
-
-const makeStyleScrapData = (styleScrap) => {
-  const {
-    id,
-    title,
-    subtitle,
-    price,
-    gender,
-    img_src,
-    img_src_two,
-    img_src_three,
-    created_at,
-    updated_at,
-  } = styleScrap
-  return {
-    id,
-    title,
-    subtitle,
-    price,
-    gender,
-    img_src,
-    img_src_two,
-    img_src_three,
-    created_at,
-    updated_at,
+  const styleScrap = await db.createStyleScrap(attr)
+  if (styleScrap) {
+    return styleScrap
+  } else {
+    return null
   }
 }
 
-module.exports = { registerStyleScrap, deleteStyleScrap, getStyleScrapList }
+// Read StyleScrap Resource [findOne, findAll]
+exports.findAllStyleScrap = async (id) => {
+  const userStyleScrap = await db.findAllStyleScrapByUser(id)
+  if (
+    userStyleScrap &&
+    userStyleScrap.styleScraps &&
+    userStyleScrap.styleScraps.length > 0
+  ) {
+    const styleScrapList = userStyleScrap.styleScraps.map((style) => {
+      let style_keyword_array = []
+      if (style.keyword_array) {
+        style_keyword_array = style.keyword_array.split(',')
+      }
+      return {
+        ...style.dataValues,
+        keyword_array: style_keyword_array,
+      }
+    })
+    return styleScrapList
+  } else {
+    return null
+  }
+}
+
+// Delete StyleScrap Resoure [destroy]
+exports.destroyStyleScrap = async (body) => {
+  const attr = {
+    userId: body.user_id,
+    styleId: body.style_id,
+  }
+  const styleScrap = await db.destroyStyleScrap(attr)
+  if (styleScrap) {
+    return styleScrap
+  } else {
+    return null
+  }
+}

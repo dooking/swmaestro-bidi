@@ -1,10 +1,156 @@
-const { Branding, Style, StyleMenu, User } = require('../../models')
+const { Branding, Style, User, BrandingStyle } = require('../../models')
 
-exports.updateAllBrandingMainStatus = async (user_id) =>
-  await Branding.update(
+// Create Branding Resource [create]
+exports.createBranding = async (attr) => {
+  const branding = await Branding.create({
+    raw: true,
+    ...attr,
+    main: false,
+  })
+  return branding
+}
+exports.createBrandingStyle = async (attr) => {
+  const brandingStyle = await BrandingStyle.create({
+    raw: true,
+    ...attr,
+  })
+  return brandingStyle
+}
+
+// Read Branding Resource [findOne, findAll]
+exports.findAllBranding = async () => {
+  const brandingList = await Branding.findAll({
+    where: {
+      main: true,
+    },
+    include: [
+      {
+        model: User,
+        attributes: ['name', 'nick_name', 'img_src'],
+      },
+      {
+        model: Style,
+        as: 'brandingStyles',
+        through: {
+          model: BrandingStyle,
+        },
+        required: false,
+      },
+    ],
+    order: [['updated_at', 'DESC']],
+  })
+  return brandingList
+}
+exports.findAllBrandingByDesignerId = async (id) => {
+  const brandingList = await Branding.findAll({
+    where: {
+      user_id: id,
+    },
+    include: [
+      {
+        model: User,
+        attributes: ['name', 'nick_name', 'img_src'],
+      },
+      {
+        model: Style,
+        as: 'brandingStyles',
+        through: {
+          model: BrandingStyle,
+        },
+        required: false,
+      },
+    ],
+    order: [
+      ['main', 'DESC'],
+      ['updated_at', 'ASC'],
+    ],
+  })
+  return brandingList
+}
+exports.findOneBrandingByUserId = async (id) => {
+  const branding = await Branding.findOne({
+    where: {
+      user_id: id,
+      main: true,
+    },
+    include: [
+      {
+        model: User,
+        attributes: ['name', 'nick_name', 'img_src'],
+      },
+      {
+        model: Style,
+        as: 'brandingStyles',
+        through: {
+          model: BrandingStyle,
+        },
+        required: false,
+      },
+    ],
+  })
+  return branding
+}
+exports.findOneBranding = async (id) => {
+  const branding = await Branding.findOne({
+    where: {
+      id,
+    },
+    include: [
+      {
+        model: Style,
+        as: 'brandingStyles',
+        through: {
+          model: BrandingStyle,
+        },
+        required: false,
+      },
+    ],
+  })
+  return branding
+}
+exports.findOneBrandingStyle = async ({ brandingId, styleId }) => {
+  const brandingStyle = await BrandingStyle.findOne({
+    where: {
+      brandingId,
+      styleId,
+    },
+  })
+  return brandingStyle
+}
+
+// Update Branding Resource [update]
+exports.updateBranding = async (id, attr) => {
+  const branding = await Branding.update(
     {
       raw: true,
-      main: 0,
+      ...attr,
+    },
+    {
+      where: {
+        id,
+      },
+    }
+  )
+  return branding[0]
+}
+exports.updateBrandingStyle = async ({ brandingId, styleId }) => {
+  const bid = await BrandingStyle.updateC(
+    {
+      raw: true,
+      styleId,
+    },
+    {
+      where: {
+        brandingId,
+      },
+    }
+  )
+  return bid[0]
+}
+exports.updateAllOtherBranding = async (user_id) => {
+  const brandingList = await Branding.update(
+    {
+      main: false,
     },
     {
       where: {
@@ -12,200 +158,38 @@ exports.updateAllBrandingMainStatus = async (user_id) =>
       },
     }
   )
-    .then((results) => {
-      console.log('Success Updating All Branding Status')
-      return results
-    })
-    .catch((err) => {
-      console.log('Failed Updating All Branding Status')
-      return err
-    })
-
-exports.updateBrandingMainStatus = async (id, user_id) =>
-  await Branding.update(
+  return brandingList[0]
+}
+exports.updateMainBranding = async (branding_id) => {
+  const branding = await Branding.update(
     {
-      raw: true,
-      main: 1,
+      main: true,
     },
     {
       where: {
-        id,
+        id: branding_id,
       },
+      returning: true,
+      plain: true,
     }
   )
-    .then((results) => {
-      console.log('Success Updating Branding Main Status')
-      return results
-    })
-    .catch((err) => {
-      console.log('Failed Updating Branding Main Status')
-      return err
-    })
-
-exports.updateBranding = async ({
-  id,
-  description,
-  shop_name,
-  position,
-  keywords,
-  main,
-  title,
-  address,
-}) =>
-  await Branding.update(
-    {
-      raw: true,
-      description,
-      shop_name,
-      position,
-      keywords,
-      main,
-      title,
-      address,
-    },
-    {
-      where: {
-        id,
-      },
-    }
-  )
-    .then((results) => {
-      console.log('Success Updating Branding')
-      return results
-    })
-    .catch((err) => {
-      console.log(err)
-      console.log('Failed Updating Branding')
-      return err
-    })
-
-exports.destroyBranding = async (brandingId) =>
-  await Branding.destroy({
-    where: {
-      id: brandingId,
-    },
-  })
-    .then((results) => {
-      console.log('Success Destroying Branding')
-      return results
-    })
-    .catch((err) => {
-      console.log('Failed Destroying Branding')
-      return err
-    })
-
-exports.selectAllBranding = async () => {
-  const results = await Branding.findAll({
-    raw: true,
-  })
-
-  return results
+  return branding[0]
 }
 
-exports.selectAllBrandingByUserId = async (userId) => {
-  const results = await Branding.findAll({
-    raw: true,
+// Delete Branding Resource [destroy]
+exports.destroyBranding = async (id) => {
+  const branding = await Branding.destroy({
     where: {
-      user_id: userId,
+      id,
     },
   })
-
-  return results
+  return branding
 }
-
-exports.selectBrandingInfo = async (userId) => {
-  const results = await Branding.findOne({
-    raw: true,
+exports.destroyBrandingStyle = async (brandingId) => {
+  const brandingStyle = await BrandingStyle.destroy({
     where: {
-      user_id: userId,
+      brandingId,
     },
-    include: [
-      {
-        model: User,
-        attributes: ['name', 'img_src'],
-      },
-    ],
   })
-
-  return results
+  return brandingStyle
 }
-
-exports.selectBrandingWithStyle = async (userId) =>
-  await Branding.findAll({
-    where: {
-      user_id: userId,
-    },
-    include: [
-      {
-        model: Style,
-        as: 'styleMenus',
-        through: {
-          model: StyleMenu,
-        },
-        required: false,
-      },
-      {
-        model: User,
-        attributes: ['name', 'img_src', 'address'],
-      },
-    ],
-    order: [
-      ['main', 'DESC'],
-      ['created_at', 'ASC'],
-    ],
-  })
-    .then((results) => {
-      console.log('Success Selecting All Branding With Style')
-      return results
-    })
-    .catch((err) => {
-      console.log('Failed Selecting All Branding With Style')
-      return err
-    })
-
-exports.insertBranding = async ({
-  user_id,
-  description,
-  shop_name,
-  keywords,
-  main,
-  title,
-  position,
-  address,
-  authentication,
-}) =>
-  await Branding.create({
-    raw: true,
-    userId: user_id,
-    description,
-    shop_name,
-    position,
-    keywords,
-    main,
-    title,
-    address,
-    authentication,
-  })
-    .then((results) => {
-      console.log('Success Creating Branding')
-      return results
-    })
-    .catch((err) => {
-      console.log('Failed Creating Branding')
-      return err
-    })
-
-exports.insertBrandingStyle = async (brandingId, styleId) =>
-  await StyleMenu.create({
-    raw: true,
-    brandingId,
-    styleId,
-  })
-    .then((results) => {
-      console.log('Success Creating StyleMenu')
-      return results
-    })
-    .catch((err) => {
-      console.log('Failed Creating StyleMenu')
-      return err
-    })

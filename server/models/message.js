@@ -19,6 +19,11 @@ const modelAttributes = {
     allowNull: false,
     defaultValue: true,
   },
+  content_type: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: '',
+  },
   content: {
     type: DataTypes.STRING,
     allowNull: false,

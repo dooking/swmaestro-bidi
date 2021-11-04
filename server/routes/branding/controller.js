@@ -1,128 +1,154 @@
 const brandingServices = require('../../services/branding')
-const { STATUS_CODE, ERROR_MESSAGE } = require('../../lib/constants')
+const { STATUS_CODE } = require('../../lib/constants')
 
-/*
-    PATCH /api/branding/:id
-    * Branding 정보 수정 API
-*/
-exports.editBranding = async (req, res, next) => {
-  try {
-    const { id } = req.params
-    const params = req.body
-    const branding = await brandingServices.editBranding({ ...params, id })
-    res.status(STATUS_CODE.SUCCESS).json({
-      message: '브랜딩 정보 수정 성공',
-      data: { branding },
+// [ 1. POST Methods ]
+exports.registerBranding = async (req, res) => {
+  const body = req.body
+  const branding = await brandingServices.createBranding(body)
+  const brandingStyle = await brandingServices.createBrandingStyle({
+    brandingId: branding.id,
+    styleIdList: body.styleIdList,
+  })
+  if (branding) {
+    res.status(STATUS_CODE.CREATED).json({
+      status: 'success',
+      message: '포트폴리오 등록 성공',
+      data: [{ branding, brandingStyle }],
     })
-  } catch (error) {
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
+  } else {
+    res.status(STATUS_CODE.BAD_REQUEST).json({
+      status: 'failed',
+      message: '포트폴리오 등록에 실패했습니다',
+      data: [],
+    })
   }
 }
 
-/*
-    PATCH /api/branding/main
-    * Branding Main 상태 정보 수정 API
-*/
-exports.editMainBranding = async (req, res, next) => {
-  try {
-    const { id, user_id } = req.body
-    const branding = await brandingServices.editMainBranding(id, user_id)
-
+// [ 2. GET Methods ]
+exports.getBrandingList = async (req, res) => {
+  const brandingList = await brandingServices.findAllBranding()
+  if (brandingList && brandingList.length > 0) {
     res.status(STATUS_CODE.SUCCESS).json({
-      message: '대표 브랜딩 정보 수정 성공',
-      data: { branding },
-    })
-  } catch (error) {
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
-  }
-}
-
-/*
-    DELETE /api/branding/:id
-    * Branding 정보 삭제 API
-*/
-exports.deleteBranding = async (req, res, next) => {
-  try {
-    const { id } = req.params
-    const branding = await brandingServices.deleteBranding(id)
-
-    res.status(STATUS_CODE.SUCCESS).json({
-      message: '브랜딩 정보 삭제 성공',
-      data: { branding },
-    })
-  } catch (error) {
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
-  }
-}
-
-/*
-    GET /api/branding/list
-    * 전체 브랜딩 리스트 정보 조회 API
-*/
-exports.getBrandingList = async (req, res, next) => {
-  try {
-    const brandingList = await brandingServices.getBrandingList()
-
-    res.status(STATUS_CODE.SUCCESS).json({
-      message: '전체 브랜딩 리스트 정보 조회 성공',
+      status: 'success',
+      message: '전체 포트폴리오 목록 조회 성공',
       data: brandingList,
     })
-  } catch (error) {
-    console.log(error)
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
+  } else {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'empty',
+      message: '조회할 전체 포트폴리오 목록이 없습니다',
+      data: [],
+    })
+  }
+}
+exports.getBranding = async (req, res) => {
+  const { id } = req.params
+  const branding = await brandingServices.findOneBranding(id)
+  if (branding) {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'success',
+      message: '포트폴리오 정보 조회 성공',
+      data: [branding],
+    })
+  } else {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'empty',
+      message: '조회할 포트폴리오 정보가 없습니다',
+      data: [],
+    })
+  }
+}
+exports.getBrandingListByDesignerId = async (req, res) => {
+  const { id } = req.params
+  const brandingList = await brandingServices.findAllBrandingByDesignerId(id)
+  if (brandingList && brandingList.length > 0) {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'success',
+      message: '디자이너의 포트폴리오 목록 조회 성공',
+      data: brandingList,
+    })
+  } else {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'empty',
+      message: '조회할 디자이너의 포트폴리오 목록이 없습니다',
+      data: [],
+    })
+  }
+}
+exports.getMainBrandingByDesignerId = async (req, res) => {
+  const { id } = req.params
+  const branding = await brandingServices.findOneBrandingByDesignerId(id)
+  if (branding) {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'success',
+      message: '디자이너의 Main 포트폴리오 정보 조회 성공',
+      data: [branding],
+    })
+  } else {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'empty',
+      message: '조회할 디자이너의 Main 포트폴리오 정보가 없습니다',
+      data: [],
+    })
   }
 }
 
-/*
-    GET /api/branding/:userId
-    * 브랜딩 페이지 상세 정보 조회 API
-*/
-exports.getBrandings = async (req, res, next) => {
-  try {
-    const { userId } = req.params
-    const brandingInfo = await brandingServices.getBrandingListByUserId(userId)
+// [ 3. PATCH Methods ]
+exports.patchBranding = async (req, res) => {
+  const { id } = req.params
+  const body = req.body
+  const patchedBrandingCount = await brandingServices.updateBranding(id, body)
+  const patchBrandingStyleCount = await brandingServices.updateBrandingStyle({
+    brandingId: id,
+    styleIdList: body.styleIdList,
+  })
+  if (patchedBrandingCount || patchBrandingStyleCount) {
     res.status(STATUS_CODE.SUCCESS).json({
-      message: '브랜딩 페이지 정보 조회 성공',
-      data: brandingInfo,
+      status: 'success',
+      message: '포트폴리오 정보 수정 성공',
+      data: patchedBrandingCount,
     })
-  } catch (error) {
-    console.log(error)
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
+  } else {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'empty',
+      message: '수정된 포트폴리오 정보가 없습니다',
+      data: patchedBrandingCount,
+    })
+  }
+}
+exports.patchMainBranding = async (req, res) => {
+  const body = req.body
+  const patchedBrandingCount = await brandingServices.updateMainBranding(body)
+  if (patchedBrandingCount) {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'success',
+      message: 'main 포트폴리오 정보 수정 성공',
+      data: patchedBrandingCount,
+    })
+  } else {
+    res.status(STATUS_CODE.SUCCESS).json({
+      status: 'empty',
+      message: '수정된 Main 포트폴리오 정보가 없습니다',
+      data: patchedBrandingCount,
+    })
   }
 }
 
-/*
-    POST /api/branding/register
-    * 브랜딩 페이지 등록 API
-*/
-exports.registerBranding = async (req, res, next) => {
-  try {
-    const params = req.body
-    const brandingInfo = await brandingServices.registerBranding(params)
-    console.log(brandingInfo)
-    const brandingStyle = await brandingServices.registerBrandingStyle({
-      brandingId: brandingInfo.id,
-      styles: params.styles,
-    })
-
+// [ 4. DELETE Methods]
+exports.deleteBranding = async (req, res) => {
+  const { id } = req.params
+  const deletedBrandingCount = await brandingServices.destroyBranding(id)
+  if (deletedBrandingCount) {
     res.status(STATUS_CODE.SUCCESS).json({
-      message: '브랜딩 페이지 작성 성공',
-      data: { brandingInfo, brandingStyle },
+      status: 'success',
+      message: '포트폴리오 삭제 성공',
+      data: deletedBrandingCount,
     })
-  } catch (error) {
-    console.log(error)
-    res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json({ message: ERROR_MESSAGE.SERVER_ERROR })
+  } else {
+    res.status(STATUS_CODE.NOT_FOUND).json({
+      status: 'failed',
+      message: '삭제할 포트폴리오 정보가 없습니다',
+      data: deletedBrandingCount,
+    })
   }
 }

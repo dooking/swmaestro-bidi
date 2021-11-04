@@ -2,7 +2,8 @@
 #
 .DS_Store
 
-# Xcode
+yarn.lock
+
 #
 build/
 *.pbxuser
@@ -35,6 +36,7 @@ node_modules/
 npm-debug.log
 yarn-error.log
 yarn.lock
+yarn
 
 # BUCK
 buck-out/
