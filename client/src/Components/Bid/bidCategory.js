@@ -70,10 +70,10 @@ function BidCategory({
       ) : (
         <View>
           <View style={styles.categoryArea}>
-            <Text>{lengthTypeValue}</Text>
+            <Text>중발 길이 머리</Text>
           </View>
           <View style={styles.categoryArea}>
-            <Text>{styleTypeValue}</Text>
+            <Text>파마 시술</Text>
           </View>
         </View>
       )}

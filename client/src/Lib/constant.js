@@ -18,7 +18,6 @@ export const SHOP_EXTRA_INFO_LIST = [
   '심야 영업',
   '클리닉 가능',
 ];
-
 export const GENDER_TYPE = [
   { label: '남성', value: 'male', key: '13' },
   { label: '여성', value: 'female', key: '14' },
@@ -310,127 +309,58 @@ export const STYLE_INFO = {
   female: [
     {
       id: 'style26',
-      styleName: '올림머리',
+      styleName: '볼륨매직',
+      index: 1,
     },
     {
       id: 'style14',
-      styleName: '볼륨매직',
+      styleName: '레이어드컷',
+      index: 2,
     },
     {
       id: 'style02',
-      styleName: '웨이브펌',
+      styleName: '댄디헤어',
+      index: 3,
     },
     {
       id: 'style03',
-      styleName: '아이롱펌',
+      styleName: '내츄럴펌',
+      index: 4,
     },
     {
       id: 'style04',
-      styleName: '라이트브라운',
+      styleName: 'S컬펌',
+      index: 5,
     },
     {
       id: 'style05',
-      styleName: '볼륨매직',
+      styleName: 'C컬펌',
+      index: 6,
     },
     {
       id: 'style06',
-      styleName: '숏컷',
+      styleName: '지젤펌',
+      index: 7,
     },
     {
       id: 'style07',
-      styleName: '금발헤어',
+      styleName: '원랭스컷',
+      index: 8,
     },
     {
       id: 'style08',
-      styleName: '볼륨매직',
+      styleName: '물결펌',
+      index: 9,
     },
     {
       id: 'style09',
-      styleName: '볼륨매직',
+      styleName: '셋팅펌',
+      index: 10,
     },
     {
       id: 'style10',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style11',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style12',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style13',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style15',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style16',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style17',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style18',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style19',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style20',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style21',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style22',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style23',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style24',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style25',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style27',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style28',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style29',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style30',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style31',
-      styleName: '볼륨매직',
-    },
-    {
-      id: 'style01',
-      styleName: '짧은머리 c컬펌',
+      styleName: '숏컷',
+      index: 11,
     },
   ],
 };

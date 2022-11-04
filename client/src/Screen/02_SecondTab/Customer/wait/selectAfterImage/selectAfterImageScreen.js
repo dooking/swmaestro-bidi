@@ -31,17 +31,10 @@ function SelectAfterImageScreen({ navigation, route }) {
     });
   };
   const selectBidi = async (e) => {
-    if (user.ai_enable) {
-      navigation.navigate('SelectFromBidi', {
-        setAfterImageStyle,
-        isUpdate,
-      });
-    } else {
-      Alert.alert(
-        '아직 BiDi AI 디자이너를 활성화 하지 않으셨어요',
-        '마이페이지에서 활성화 하실 수 있어요!',
-      );
-    }
+    navigation.navigate('SelectFromBidi', {
+      setAfterImageStyle,
+      isUpdate,
+    });
   };
 
   return (

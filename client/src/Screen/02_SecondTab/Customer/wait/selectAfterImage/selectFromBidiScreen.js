@@ -11,29 +11,29 @@ function SelectFromBidiScreen({ navigation, route }) {
   const { data: user } = useSelector((state) => state.user);
   const [afterStyle, setAfterStyle] = useState('none');
   const [tab, setTab] = useState('tab1');
+  const [index, setIndex] = useState(1);
 
   const goBack = async () => {
     navigation.goBack();
   };
   const submit = async () => {
-    setAfterImageStyle(
-      `https://bidi-s3.s3.ap-northeast-2.amazonaws.com/image/user/${user.id}/result/${afterStyle}.jpg`,
-    );
+    setAfterImageStyle(`https://bidi-s3.s3.ap-northeast-2.amazonaws.com/demo/result${index}.jpeg`);
     if (isUpdate) navigation.navigate('UpdateProposal');
     else navigation.navigate('CreateProposal');
   };
-  const selectStyle = (style) => {
+  const selectStyle = (style, index) => {
     setAfterStyle(style);
+    setIndex(index);
   };
   const tabHandler = (tab) => {
     const nextTab = tab;
     setTab(nextTab);
   };
-  const list = STYLE_INFO[user.gender_type].map(({ id, styleName }) => (
+  const list = STYLE_INFO[user.gender_type].map(({ id, styleName, index }) => (
     <TouchableOpacity
       key={id}
       activeOpacity={0.8}
-      onPress={() => selectStyle(id)}
+      onPress={() => selectStyle(id, index)}
       style={styles.styleBox}>
       <Text style={afterStyle == id ? styles.styleTitleSelected : styles.styleTitle}>
         {styleName}
@@ -41,7 +41,7 @@ function SelectFromBidiScreen({ navigation, route }) {
       <Image
         style={afterStyle == id ? { ...styles.styleImage, opacity: 0.9 } : styles.styleImage}
         source={{
-          uri: `https://bidi-s3.s3.ap-northeast-2.amazonaws.com/image/ref/${user.gender_type}/${user.gender_type}_${id}.jpg`,
+          uri: `https://bidi-s3.s3.ap-northeast-2.amazonaws.com/demo/reference${index}.png`,
         }}
       />
     </TouchableOpacity>
@@ -67,14 +67,14 @@ function SelectFromBidiScreen({ navigation, route }) {
           <Image
             style={styles.image}
             source={{
-              uri: `https://bidi-s3.s3.ap-northeast-2.amazonaws.com/image/user/${user.id}/result/${afterStyle}.jpg`,
+              uri: `https://bidi-s3.s3.ap-northeast-2.amazonaws.com/demo/result${index}.jpeg`,
             }}
           />
         )}
       </View>
       <View>
         <ScrollView>
-          <View style={styles.headerContainer}>
+          {/* <View style={styles.headerContainer}>
             <View style={[styles.tab, tab == 'tab1' && styles.active]}>
               <TouchableOpacity onPress={() => tabHandler('tab1')}>
                 <Text style={[styles.headerTitle, tab == 'tab1' && styles.active]}>펌</Text>
@@ -92,7 +92,7 @@ function SelectFromBidiScreen({ navigation, route }) {
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </View> */}
           <View style={styles.tabLine}></View>
         </ScrollView>
       </View>
@@ -139,21 +139,21 @@ const styles = StyleSheet.create({
   },
   content: {
     width: '100%',
-    height: '50%',
-    borderWidth: 1,
-    borderColor: 'rgb(214,214,214)',
+    height: '59%',
+    resizeMode: 'contain',
   },
   image: {
     width: '100%',
     height: '100%',
+    resizeMode: 'contain',
   },
   header: {
     fontSize: 23,
     fontWeight: '700',
   },
   tabLine: {
-    borderBottomWidth: 1,
-    borderColor: '#e2e2e2',
+    // borderBottomWidth: 1,
+    // borderColor: '#e2e2e2',
   },
   headerTitle: {
     fontSize: 15,
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    height: 70,
+    height: 60,
     backgroundColor: 'rgb(11,14,43)',
   },
   backButton: {
